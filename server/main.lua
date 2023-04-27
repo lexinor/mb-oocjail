@@ -1,3 +1,4 @@
+lib.locale()
 local globalJailTime = 0
 
 function ExtractIdentifiers(id)
@@ -55,7 +56,7 @@ function sendToDiscord(title, message, color, id, adminID) --Functions to send t
                     ["name"] = Config.Log.server_name, --Set name
                 },
                 ["title"] = "**".. title .."**", --Set title
-                ["description"] = Lang:t("log.jail_additional", {discord = discord, ID = id, fName = bannedCharInfo.firstName, lName = bannedCharInfo.lastName, CID = bannedCitizenId, adDiscord = adminDiscord, adFName = adminCharInfo.firstName, adLName = adminCharInfo.lastName, message = message}), --Set message
+                ["description"] = locale("log.jail_additional", {discord = discord, ID = id, fName = bannedCharInfo.firstName, lName = bannedCharInfo.lastName, CID = bannedCitizenId, adDiscord = adminDiscord, adFName = adminCharInfo.firstName, adLName = adminCharInfo.lastName, message = message}), --Set message
                 ["footer"] = {
                     ["text"] = '' ..time.year.. '/' ..time.month..'/'..time.day..' '.. time.hour.. ':'..time.min, --Get time
                 },
@@ -65,59 +66,63 @@ function sendToDiscord(title, message, color, id, adminID) --Functions to send t
     PerformHttpRequest(Config.Log.webhook, function(err, text, headers) end, 'POST', json.encode({username = name, embeds = embed}), { ['Content-Type'] = 'application/json' })
 end
 
-QBCore.Commands.Add(Config.JailCommandName.name, Config.JailCommandName.help, {{name = Lang:t("argument.id"), help = Lang:t("argument.id_help")}, {name = Lang:t("argument.time"), help = Lang:t("argument.time_help")}, {name = Lang:t("argument.reason"), help = Lang:t("argument.reason_help")}}, true, function(source, args)
-    if not args[1] or not args[2] or not args[3] then
-        MBNotify(Lang:t("notify.title"), Lang:t("error.fill_argument"), 'error', source)
+ESX.RegisterCommand(Config.JailCommandName.name, Config.JailCommandName.permission, function(xPlayer, args, showError)
+    
+    if not args.id or not args.time or not args.reason then
+        print(json.encode(args))
+        MBNotify(locale("notify.title"), locale("error.fill_argument"), 'error', source)
     else
-        local src = source
+        print(json.encode(args))
+        local src = xPlayer.source
         local reason = {}
         for i = 3, #args, 1 do
             reason[#reason+1] = args[i]
         end
 
         if src then
-            TriggerEvent("mb-oocjail:server:JailPlayer", tonumber(args[1]), tonumber(args[2]))
-            MBNotify(Lang:t("notify.title"), Lang:t("success.you_have_been_jailed"), 'error', src)
-            sendToDiscord(Lang:t("log.jail_title"), Lang:t("log.jail_description", {time = tonumber(args[2]), reason = table.concat(reason, " ")}), Config.Log.jail_color, tonumber(args[1]), src)
+            TriggerEvent("mb-oocjail:server:JailPlayer", tonumber(args.id ), tonumber(args.time))
+            MBNotify(locale("notify.title"), locale("success.you_have_been_jailed"), 'error', src)
+            sendToDiscord(locale("log.jail_title"), locale("log.jail_description", tonumber(args.time), table.concat(reason, " ")), Config.Log.jail_color, tonumber(args.id), src)
         else
-            MBNotify(Lang:t("notify.title"), Lang:t("error.no_permission"), 'error', src)
+            MBNotify(locale("notify.title"), locale("error.no_permission"), 'error', src)
         end
     end
-end, Config.JailCommandName.permission)
+end, false, {help = Config.JailCommandName.help, arguments = {
+    {name = locale("argument.id"), help = locale("argument.id_help"), type = "number"}, 
+    {name = locale("argument.time"), help = locale("argument.time_help"), type = "number"}, 
+    {name = locale("argument.reason"), help = locale("argument.reason_help"), type = "string"}
+}})
 
-QBCore.Commands.Add(Config.UnjailCommandName.name, Config.UnjailCommandName.help, {{name = Lang:t("argument.id"), help = Lang:t("argument.id_help")}}, true, function(source, args)
-    local src = source
-    local Player = ESX.GetPlayerFromId(src)
-    if Player then
-        local playerId = tonumber(args[1])
+ESX.RegisterCommand(Config.UnjailCommandName.name, Config.UnjailCommandName.permission, function(xPlayer, args, showError)
+    if xPlayer then
+        local playerId = tonumber(args.id)
         TriggerClientEvent("mb-oocjail:client:UnJailOOC", playerId)
     else
-        MBNotify(Lang:t("notify.title"), Lang:t("error.no_permission"), 'error', src)
+        MBNotify(locale("notify.title"), locale("error.no_permission"), 'error', xPlayer.source)
     end
-end, Config.UnjailCommandName.permission)
+end, false, {help = Config.UnjailCommandName.help, arguments = {{name = locale("argument.id"), help = locale("argument.id_help"), type = "number"}}})
 
-QBCore.Commands.Add(Config.CheckTimeLeftCommand.name, Config.CheckTimeLeftCommand.help, {}, false, function(source)
+ESX.RegisterCommand(Config.CheckTimeLeftCommand.name, Config.CheckTimeLeftCommand.permission, function(xPlayer, args, showError)
     local src = source
-    local Player = ESX.GetPlayerFromId(src)
 
     if Config.CheckTimeLeftCommand.allow then
-        if Player.getMeta("oocjail") > 0 then
+        if xPlayer.getMeta("oocjail") > 0 then
             if Config.CheckJailTimeType == "notify" then
-                MBNotify(Lang:t("notify.title"), Lang:t("notify.check_time", {time = globalJailTime}), 'info', src)
+                MBNotify(locale("notify.title"), locale("notify.check_time", {time = globalJailTime}), 'info', src)
             elseif Config.CheckJailTimeType == "chat" then
                 TriggerClientEvent('chat:addMessage', src, {
-                    template = '<div class="chat-message"><div class="chat-message"><font color="#D994DB"><strong>'..Lang:t("notify.check_time", {time = globalJailTime})..'</div></div>',
+                    template = '<div class="chat-message"><div class="chat-message"><font color="#D994DB"><strong>'..locale("notify.check_time", {time = globalJailTime})..'</div></div>',
                 })
             else
                 print("Your choice of output time check is invalid, we dont support that type of output yet! Check your config please.")
             end
         else
-            MBNotify(Lang:t("notify.title"), Lang:t("error.no_permission"), 'error', src)
+            MBNotify(locale("notify.title"), locale("error.no_permission"), 'error', src)
         end
     else
-        MBNotify(Lang:t("notify.title"), Lang:t("error.no_permission"), 'error', src)
+        MBNotify(locale("notify.title"), locale("error.no_permission"), 'error', src)
     end
-end)
+end, false, {help = Config.CheckTimeLeftCommand.help })
 
 RegisterNetEvent("mb-oocjail:server:CheckJailTime", function(jailTime)
     globalJailTime = jailTime
@@ -141,18 +146,18 @@ RegisterNetEvent('mb-oocjail:server:SetJailTime', function(jailTime)
 
     if jailTime ~= 0 then
         TriggerClientEvent('chat:addMessage', src, {
-            template = '<div class="chat-message"><div class="chat-message"><font color="#D994DB"><strong>'..Lang:t("notify.jailed_player", {time = jailTime})..'</div></div>',
+            template = '<div class="chat-message"><div class="chat-message"><font color="#D994DB"><strong>'..locale("notify.jailed_player", {time = jailTime})..'</div></div>',
         })
     else
         TriggerClientEvent('chat:addMessage', src, {
-            template = '<div class="chat-message"><div class="chat-message"><font color="#D994DB"><strong>'..Lang:t("notify.released_player")..'</div></div>',
+            template = '<div class="chat-message"><div class="chat-message"><font color="#D994DB"><strong>'..locale("notify.released_player")..'</div></div>',
         })
     end
 
     if jailTime > 0 and Config.LostJob then
         if Player.job.name ~= "unemployed" then
             Player.setJob("unemployed")
-            MBNotify(Lang:t("notify.title"), Lang:t("success.you_lost_job"), 'info', src)
+            MBNotify(locale("notify.title"), locale("success.you_lost_job"), 'info', src)
         end
     end
 end)
@@ -164,6 +169,6 @@ RegisterNetEvent("mb-oocjail:server:ClearInv", function()
     if Config.DeleteInventory then
         Wait(2000)
         Player.Functions.ClearInventory()
-        MBNotify(Lang:t("notify.title"), Lang:t("success.clear_inv"), 'info', src)
+        MBNotify(locale("notify.title"), locale("success.clear_inv"), 'info', src)
     end
 end)

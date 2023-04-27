@@ -1,0 +1,22 @@
+{
+    "success.you_have_been_jailed": "You have been OOC Jail by admin",
+    "success.you_lost_job": "You've lost your current job",
+    "success.clear_inv": "Your inventory has been cleared out",
+    "success.you_are_free": "You are free from OOC Jail",
+    "error.fill_argument": "Please fill all the argument",
+    "error.no_permission": "No permission to use this command",
+    "error.invalid_argument": "Invalid input",
+    "notify.title": "OOC Jail",
+    "notify.jailed_player": "• System • <font color='#C1C1C1'>You have been OOC Jail for <font color='#53A263'>%s <font color='#C1C1C1'> minutes (See discord for more information).",
+    "notify.released_player": "• System • <font color='#C1C1C1'>You have been <font color='#53A263'>release<font color='#C1C1C1'> from OOC jail (dont break the rule again).",
+    "notify.check_time": "You still have %s minutes left from OOC Jail, keep regreting!",
+    "argument.id": "id",
+    "argument.id_help": "Player's ID",
+    "argument.time": "time",
+    "argument.time_help": "Jail time (minutes)",
+    "argument.reason": "reason",
+    "argument.reason_help": "Reason for the jail",
+    "log.jail_title": "OOC Jail",
+    "log.jail_description": "`Total jail time: %s mins`\n`Reason: %s`\n\n Join our discord for more information",
+    "log.jail_additional": "**Prisoner** (%s)\n`Player's ID: %d`\n`In-game name: %s %s`\n`CID: %s`\n\n**Admin** (%s)\n`In-game name: %s %s`\n%s"
+}

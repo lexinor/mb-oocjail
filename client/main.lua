@@ -1,3 +1,4 @@
+lib.locale()
 local inJail = false
 local jailTime = 0
 local isRunText = false
@@ -56,7 +57,7 @@ end)
 
 RegisterNetEvent('mb-oocjail:client:UnJailOOC', function()
 	if jailTime > 0 then
-		MBNotify(Lang:t("notify.title"), Lang:t("success.you_are_free"), 'success')
+		MBNotify(locale("notify.title"), locale("success.you_are_free"), 'success')
 		DoScreenFadeOut(500)
 		while not IsScreenFadedOut() do
 			Wait(10)
@@ -113,11 +114,10 @@ Citizen.CreateThread(function()
 		if inJail and jailTime > 0 then
 			local curPos = GetEntityCoords(cache.ped or PlayerPedId())
 			if EscapePrevention(curPos) then
-				QBCore.Functions.GetPlayerData(function(PlayerData)
-					if PlayerData.metadata["oocjail"] > 0 then
-						TriggerEvent("mb-oocjail:client:SendToJail", PlayerData.metadata["oocjail"])
-					end
-				end)
+				PlayerData = ESX.GetPlayerData()
+				if PlayerData.getMeta("oocjail") > 0 then
+					TriggerEvent("mb-oocjail:client:SendToJail", PlayerData.getMeta("oocjail"))
+				end
 			end
 		end
 		Citizen.Wait(Config.PreventEscapeMod.checkTime)

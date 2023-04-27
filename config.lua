@@ -33,7 +33,7 @@ Config.Log = {
     --Set avatar for the log/annoucement (optional)
     avatar = "https://media.discordapp.net/attachments/1037224938005872661/1037225027453599744/Guess_project.png",
     --Set the server name for the log/annoucement (optional)
-    server_name = "New Danw RP",
+    server_name = "New Dawn RP",
     --Color for the log/annoucement (optional)
     jail_color = 16711680,
 }
@@ -41,7 +41,7 @@ Config.Log = {
 --Config for jail command
 Config.JailCommandName = {
     --Who can use this command? (options: 'god', 'admin')
-    permission = "admin",
+    permission = {"superadmin", "admin"},
     --What should the command name be? (/oocjail)
     name = "jail",
     --Help message for the command
@@ -51,7 +51,7 @@ Config.JailCommandName = {
 --Config for unjail command
 Config.UnjailCommandName = {
     --Who can use this command? (options: 'god', 'admin')
-    permission = "admin",
+    permission = {"superadmin", "admin"},
     --What should the command name be? (/oocunjail)
     name = "unjail",
     --Help message for the command

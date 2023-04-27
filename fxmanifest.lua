@@ -5,6 +5,8 @@ version '1.0.0'
 game 'gta5'
 description 'Admin Jail'
 
+lua54 'yes'
+
 client_script 'client/main.lua'
 
 server_scripts {
@@ -20,4 +22,8 @@ shared_scripts {
     'locales/en.lua',
     'locales/*.lua',
     'shared/shared.lua',
+}
+
+files {
+    "locales/*.json"
 }
