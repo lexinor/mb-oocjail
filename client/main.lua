@@ -1,5 +1,3 @@
-local QBCore = exports['qb-core']:GetCoreObject()
-
 local inJail = false
 local jailTime = 0
 local isRunText = false
@@ -17,19 +15,19 @@ local function EscapePrevention(curPos)
 	end
 end
 
-RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-	QBCore.Functions.GetPlayerData(function(cPlayerData)
-		PlayerData = cPlayerData
-		if cPlayerData.metadata["oocjail"] > 0 then
-			TriggerEvent("mb-oocjail:client:SendToJail", cPlayerData.metadata["oocjail"])
-		end
-	end)
+RegisterNetEvent('esx:playerLoaded', function()
+	PlayerData = ESX.GetPlayerData()
+	if PlayerData.metadata["oocjail"] > 0 then
+		TriggerEvent("mb-oocjail:client:SendToJail", PlayerData.metadata["oocjail"])
+	end
 end)
+
+
 
 RegisterNetEvent("mb-oocjail:client:AdminJail", function(time)
     inJail = true
-    ClearPedTasks(PlayerPedId())
-    DetachEntity(PlayerPedId(), true, false)
+    ClearPedTasks(cache.ped or PlayerPedId())
+    DetachEntity(cache.ped or PlayerPedId(), true, false)
     TriggerEvent("mb-oocjail:client:SendToJail", time)
 end)
 
@@ -39,8 +37,8 @@ RegisterNetEvent("mb-oocjail:client:SendToJail", function(time)
 		Wait(10)
 	end
 	local JailPosition = Config.JailLocation
-	SetEntityCoords(PlayerPedId(), JailPosition.x, JailPosition.y, JailPosition.z - 0.9, 0, 0, 0, false)
-    SetEntityInvincible(PlayerPedId(), true)
+	SetEntityCoords(cache.ped or PlayerPedId(), JailPosition.x, JailPosition.y, JailPosition.z - 0.9, 0, 0, 0, false)
+    SetEntityInvincible(cache.ped or PlayerPedId(), true)
 	Wait(500)
 
 	inJail = true
@@ -79,8 +77,8 @@ RegisterNetEvent('mb-oocjail:client:Leave', function()
 			Wait(10)
 		end
 
-		SetEntityCoords(PlayerPedId(), Config.OutJailLocation.x, Config.OutJailLocation.y, Config.OutJailLocation.z, 0, 0, 0, 0)
-		SetEntityInvincible(PlayerPedId(), false)
+		SetEntityCoords(cache.ped or PlayerPedId(), Config.OutJailLocation.x, Config.OutJailLocation.y, Config.OutJailLocation.z, 0, 0, 0, 0)
+		SetEntityInvincible(cache.ped or PlayerPedId(), false)
 
 		Wait(500)
 
@@ -113,7 +111,7 @@ end)
 Citizen.CreateThread(function()
 	while true do
 		if inJail and jailTime > 0 then
-			local curPos = GetEntityCoords(PlayerPedId())
+			local curPos = GetEntityCoords(cache.ped or PlayerPedId())
 			if EscapePrevention(curPos) then
 				QBCore.Functions.GetPlayerData(function(PlayerData)
 					if PlayerData.metadata["oocjail"] > 0 then

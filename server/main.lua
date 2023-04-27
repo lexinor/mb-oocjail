@@ -1,4 +1,3 @@
-local QBCore = exports['qb-core']:GetCoreObject()
 local globalJailTime = 0
 
 function ExtractIdentifiers(id)
@@ -38,15 +37,15 @@ function sendToDiscord(title, message, color, id, adminID) --Functions to send t
     --Banned player info
     local identifierlist = ExtractIdentifiers(id)
 	local discord = "<@"..identifierlist.discord:gsub("discord:", "")..">"
-    local bannedPlayer = QBCore.Functions.GetPlayer(id)
-    local bannedCitizenId = bannedPlayer.PlayerData.citizenid
-    local bannedCharInfo = bannedPlayer.PlayerData.charinfo
+    local bannedPlayer = ESX.GetPlayerFromId(id)
+    local bannedCitizenId = bannedPlayer.identifier
+    local bannedCharInfo = bannedPlayer
 
     --Admin info
     local adminIdentifierlist = ExtractIdentifiers(adminID)
     local adminDiscord = "<@"..adminIdentifierlist.discord:gsub("discord:", "")..">"
-    local adminPlayer = QBCore.Functions.GetPlayer(adminID)
-    local adminCharInfo = adminPlayer.PlayerData.charinfo
+    local adminPlayer = ESX.GetPlayerFromId(adminID)
+    local adminCharInfo = adminPlayer
 
     local embed = {
             {
@@ -56,7 +55,7 @@ function sendToDiscord(title, message, color, id, adminID) --Functions to send t
                     ["name"] = Config.Log.server_name, --Set name
                 },
                 ["title"] = "**".. title .."**", --Set title
-                ["description"] = Lang:t("log.jail_additional", {discord = discord, ID = id, fName = bannedCharInfo.firstname, lName = bannedCharInfo.lastname, CID = bannedCitizenId, adDiscord = adminDiscord, adFName = adminCharInfo.firstname, adLName = adminCharInfo.lastname, message = message}), --Set message
+                ["description"] = Lang:t("log.jail_additional", {discord = discord, ID = id, fName = bannedCharInfo.firstName, lName = bannedCharInfo.lastName, CID = bannedCitizenId, adDiscord = adminDiscord, adFName = adminCharInfo.firstName, adLName = adminCharInfo.lastName, message = message}), --Set message
                 ["footer"] = {
                     ["text"] = '' ..time.year.. '/' ..time.month..'/'..time.day..' '.. time.hour.. ':'..time.min, --Get time
                 },
@@ -88,7 +87,7 @@ end, Config.JailCommandName.permission)
 
 QBCore.Commands.Add(Config.UnjailCommandName.name, Config.UnjailCommandName.help, {{name = Lang:t("argument.id"), help = Lang:t("argument.id_help")}}, true, function(source, args)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = ESX.GetPlayerFromId(src)
     if Player then
         local playerId = tonumber(args[1])
         TriggerClientEvent("mb-oocjail:client:UnJailOOC", playerId)
@@ -99,10 +98,10 @@ end, Config.UnjailCommandName.permission)
 
 QBCore.Commands.Add(Config.CheckTimeLeftCommand.name, Config.CheckTimeLeftCommand.help, {}, false, function(source)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = ESX.GetPlayerFromId(src)
 
     if Config.CheckTimeLeftCommand.allow then
-        if Player.PlayerData.metadata["oocjail"] > 0 then
+        if Player.getMeta("oocjail") > 0 then
             if Config.CheckJailTimeType == "notify" then
                 MBNotify(Lang:t("notify.title"), Lang:t("notify.check_time", {time = globalJailTime}), 'info', src)
             elseif Config.CheckJailTimeType == "chat" then
@@ -126,19 +125,19 @@ end)
 
 RegisterNetEvent("mb-oocjail:server:JailPlayer", function(playerId, time)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    local OtherPlayer = QBCore.Functions.GetPlayer(playerId)
+    local Player = ESX.GetPlayerFromId(src)
+    local OtherPlayer = ESX.GetPlayerFromId(playerId)
 
-    OtherPlayer.Functions.SetMetaData("oocjail", time)
+    OtherPlayer.setMeta("oocjail", time)
 
-    TriggerClientEvent("mb-oocjail:client:AdminJail", OtherPlayer.PlayerData.source, time)
+    TriggerClientEvent("mb-oocjail:client:AdminJail", OtherPlayer.source, time)
 end)
 
 RegisterNetEvent('mb-oocjail:server:SetJailTime', function(jailTime)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = ESX.GetPlayerFromId(src)
     if not Player then return end
-    Player.Functions.SetMetaData("oocjail", jailTime)
+    Player.setMeta("oocjail", jailTime)
 
     if jailTime ~= 0 then
         TriggerClientEvent('chat:addMessage', src, {
@@ -151,8 +150,8 @@ RegisterNetEvent('mb-oocjail:server:SetJailTime', function(jailTime)
     end
 
     if jailTime > 0 and Config.LostJob then
-        if Player.PlayerData.job.name ~= "unemployed" then
-            Player.Functions.SetJob("unemployed")
+        if Player.job.name ~= "unemployed" then
+            Player.setJob("unemployed")
             MBNotify(Lang:t("notify.title"), Lang:t("success.you_lost_job"), 'info', src)
         end
     end
@@ -160,7 +159,7 @@ end)
 
 RegisterNetEvent("mb-oocjail:server:ClearInv", function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = ESX.GetPlayerFromId(src)
     if not Player then return end
     if Config.DeleteInventory then
         Wait(2000)

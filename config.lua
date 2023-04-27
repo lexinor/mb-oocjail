@@ -14,7 +14,7 @@ Config.DeleteInventory = false
 
 --What kind of notify you want to use? (options: "qb-core", "okokNotify", "roda-notify")
 --You can easily edit all the notifications in the shared/shared.lua
-Config.Notify = "qb-core"
+Config.Notify = "ox"
 
 --Should the script prevent player from escaping? They will be pull back everytime they going to far
 Config.PreventEscapeMod = {
@@ -23,7 +23,7 @@ Config.PreventEscapeMod = {
     --How far is the player allowed to go before being pulled back?
     distance = 15,
     --How often should the script check player coords? (in ms)
-    checkTime = 3000,
+    checkTime = 1500,
 }
 
 --Log/Annoucement on Discord
@@ -33,7 +33,7 @@ Config.Log = {
     --Set avatar for the log/annoucement (optional)
     avatar = "https://media.discordapp.net/attachments/1037224938005872661/1037225027453599744/Guess_project.png",
     --Set the server name for the log/annoucement (optional)
-    server_name = "GueSS Project",
+    server_name = "New Danw RP",
     --Color for the log/annoucement (optional)
     jail_color = 16711680,
 }
@@ -43,9 +43,9 @@ Config.JailCommandName = {
     --Who can use this command? (options: 'god', 'admin')
     permission = "admin",
     --What should the command name be? (/oocjail)
-    name = "oocjail",
+    name = "jail",
     --Help message for the command
-    help = "Puts a player in admin jail"
+    help = "Met un joueur en prison admin"
 }
 
 --Config for unjail command
@@ -53,9 +53,9 @@ Config.UnjailCommandName = {
     --Who can use this command? (options: 'god', 'admin')
     permission = "admin",
     --What should the command name be? (/oocunjail)
-    name = "oocunjail",
+    name = "unjail",
     --Help message for the command
-    help = "Release a player from admin jail"
+    help = "Libère un joueur de la prison admin"
 }
 
 --Check time command for player
@@ -65,7 +65,7 @@ Config.CheckTimeLeftCommand = {
     --Do you want to allow players to use this command?
     allow = true,
     --What should the command name be? (/ooctimecheck)
-    name = "ooctimecheck",
+    name = "timecheck",
     --Help message for the command
-    help = "Check remaining OOC jail time"
+    help = "Connaitre le temps restant avant libération"
 }

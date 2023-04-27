@@ -20,6 +20,18 @@ function MBNotify(title, message, type, source)
         else
             TriggerClientEvent('Roda_Notifications:showNotify', source, message, type, 10000)
         end
+    elseif Config.Notify == "ox" then
+        if not source then
+            exports['Roda_Notifications']:showNotify(message, type, 10000)
+            lib.notify({
+                title = 'PRISON ADMIN',
+                description = message,
+                type = 'inform',
+                duration = 10000,
+            })
+        else
+            TriggerClientEvent('ox_lib:notify', source, message, type, 10000)
+        end
     else
         print("mb-gym: Your type of notify choice is not supported")
     end
