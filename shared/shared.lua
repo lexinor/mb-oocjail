@@ -5,31 +5,24 @@ function MBNotify(title, message, type, source)
         else
             TriggerClientEvent('okokNotify:Alert', source, title, message, 10000, type)
         end
-    elseif Config.Notify == "qb-core" then
-        if type == "info" then
-            type = "primary"
-        end
-        if not source then
-            TriggerEvent("QBCore:Notify", message, type)
-        else
-            TriggerClientEvent("QBCore:Notify", source, message, type)
-        end
-    elseif Config.Notify == "roda-notify" then
-        if not source then
-            exports['Roda_Notifications']:showNotify(message, type, 10000)
-        else
-            TriggerClientEvent('Roda_Notifications:showNotify', source, message, type, 10000)
-        end
     elseif Config.Notify == "ox" then
         if not source then
             lib.notify({
-                title = 'PRISON ADMIN',
+                title = locale("notify.title"),
                 description = message,
-                type = 'inform',
+                type = type,
+                position = 'top',
                 duration = 10000,
+                style = {
+                    backgroundColor = '#141414',
+                    color = '#e60000'
+                },
             })
         else
-            TriggerClientEvent('ox_lib:notify', source, { type = 'inform', title = 'PRISON ADMIN', description = message, duration = 10000 })
+            TriggerClientEvent('ox_lib:notify', source, { type = 'inform', title = locale("notify.title"), description = message, duration = 10000, position = 'top', style = {
+                backgroundColor = '#141414',
+                color = '#e60000'
+            }, })
         end
     else
         print("mb-gym: Your type of notify choice is not supported")

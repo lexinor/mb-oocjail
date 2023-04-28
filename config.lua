@@ -1,13 +1,14 @@
 Config = {}
 
 --Where should the player been jailed?
-Config.JailLocation = vector3(1735.56, 2575.88, 45.56)
+--Config.JailLocation = vector3(1735.56, 2575.88, 45.56)
+Config.JailLocation = vector3( 994.5925, -3002.594, -39.64699)
 
 --Where should the player been released?
 Config.OutJailLocation = vector3(1847.84, 2585.95, 45.67)
 
 --Will they lose their current job?
-Config.LostJob = false
+Config.LostJob = true
 
 --Will their inventory be wipe out? (No way to get the item back, so be careful when set true)
 Config.DeleteInventory = false
@@ -67,5 +68,7 @@ Config.CheckTimeLeftCommand = {
     --What should the command name be? (/ooctimecheck)
     name = "timecheck",
     --Help message for the command
-    help = "Connaitre le temps restant avant libération"
+    help = "Connaitre le temps restant avant libération",
+    --Who can use this command? (options: 'god', 'admin')
+    permission = {"user"},
 }

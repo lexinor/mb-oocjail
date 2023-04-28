@@ -1,6 +1,13 @@
 lib.locale()
 local globalJailTime = 0
 
+AddEventHandler('esx:playerLoaded', function(playerId, xPlayer, isNew)
+    if xPlayer.metadata["oocjail"] > 0 then
+        TriggerEvent("mb-oocjail:server:JailPlayer", tonumber(playerId), tonumber(xPlayer.metadata["oocjail"]))
+        SetPlayerRoutingBucket(playerId, playerId)
+	end
+end)
+
 function ExtractIdentifiers(id)
 	local identifiers = {
 		steam = "",
@@ -38,16 +45,14 @@ function sendToDiscord(title, message, color, id, adminID) --Functions to send t
     --Banned player info
     local identifierlist = ExtractIdentifiers(id)
 	local discord = "<@"..identifierlist.discord:gsub("discord:", "")..">"
-    local bannedPlayer = ESX.GetPlayerFromId(id)
-    local bannedCitizenId = bannedPlayer.identifier
-    local bannedCharInfo = bannedPlayer
+    local jailedPlayer = ESX.GetPlayerFromId(id)
+    local jailedIdentifier = jailedPlayer.identifier
 
     --Admin info
     local adminIdentifierlist = ExtractIdentifiers(adminID)
     local adminDiscord = "<@"..adminIdentifierlist.discord:gsub("discord:", "")..">"
     local adminPlayer = ESX.GetPlayerFromId(adminID)
-    local adminCharInfo = adminPlayer
-
+    
     local embed = {
             {
                 ["color"] = color, --Set color
@@ -56,9 +61,9 @@ function sendToDiscord(title, message, color, id, adminID) --Functions to send t
                     ["name"] = Config.Log.server_name, --Set name
                 },
                 ["title"] = "**".. title .."**", --Set title
-                ["description"] = locale("log.jail_additional", {discord = discord, ID = id, fName = bannedCharInfo.firstName, lName = bannedCharInfo.lastName, CID = bannedCitizenId, adDiscord = adminDiscord, adFName = adminCharInfo.firstName, adLName = adminCharInfo.lastName, message = message}), --Set message
+                ["description"] = locale("log.jail_additional", discord, id, jailedPlayer.get("firstName"), jailedPlayer.get("lastName"), jailedIdentifier, adminDiscord, adminPlayer.get("firstName"), adminPlayer.get("lastName"), message), --Set message
                 ["footer"] = {
-                    ["text"] = '' ..time.year.. '/' ..time.month..'/'..time.day..' '.. time.hour.. ':'..time.min, --Get time
+                    ["text"] = '' ..time.day.. '/' ..time.month..'/'..time.year..' à '.. time.hour.. ':'..time.min, --Get time
                 },
             }
         }
@@ -69,33 +74,38 @@ end
 ESX.RegisterCommand(Config.JailCommandName.name, Config.JailCommandName.permission, function(xPlayer, args, showError)
     
     if not args.id or not args.time or not args.reason then
-        print(json.encode(args))
         MBNotify(locale("notify.title"), locale("error.fill_argument"), 'error', source)
     else
-        print(json.encode(args))
-        local src = xPlayer.source
-        local reason = {}
-        for i = 3, #args, 1 do
-            reason[#reason+1] = args[i]
-        end
-
-        if src then
-            TriggerEvent("mb-oocjail:server:JailPlayer", tonumber(args.id ), tonumber(args.time))
-            MBNotify(locale("notify.title"), locale("success.you_have_been_jailed"), 'error', src)
-            sendToDiscord(locale("log.jail_title"), locale("log.jail_description", tonumber(args.time), table.concat(reason, " ")), Config.Log.jail_color, tonumber(args.id), src)
+        local targetPlayer = nil
+        if args.id == "me" then
+            targetPlayer = xPlayer
+            playerId = xPlayer.source
         else
-            MBNotify(locale("notify.title"), locale("error.no_permission"), 'error', src)
+            targetPlayer = ESX.GetPlayerFromId(args.id)
+            playerId = args.id
+        end
+        if targetPlayer then
+            TriggerEvent("mb-oocjail:server:JailPlayer", tonumber(args.id), tonumber(args.time))
+            MBNotify(locale("notify.title"), locale("success.you_have_been_jailed"), 'error', targetPlayer.source)
+            sendToDiscord(locale("log.jail_title"), locale("log.jail_description", tonumber(args.time), args.reason), Config.Log.jail_color, tonumber(args.id), targetPlayer.source)
+        else
+            MBNotify(locale("notify.title"), locale("error.no_playerfound"), 'error', xPlayer.source)
         end
     end
 end, false, {help = Config.JailCommandName.help, arguments = {
     {name = locale("argument.id"), help = locale("argument.id_help"), type = "number"}, 
     {name = locale("argument.time"), help = locale("argument.time_help"), type = "number"}, 
-    {name = locale("argument.reason"), help = locale("argument.reason_help"), type = "string"}
+    {name = locale("argument.reason"), help = locale("argument.reason_help"), type = "string"},
 }})
 
 ESX.RegisterCommand(Config.UnjailCommandName.name, Config.UnjailCommandName.permission, function(xPlayer, args, showError)
     if xPlayer then
-        local playerId = tonumber(args.id)
+        local playerId = nil
+        if args.id == "me" then
+            playerId = xPlayer.source
+        else
+            playerId = args.id
+        end
         TriggerClientEvent("mb-oocjail:client:UnJailOOC", playerId)
     else
         MBNotify(locale("notify.title"), locale("error.no_permission"), 'error', xPlayer.source)
@@ -103,21 +113,19 @@ ESX.RegisterCommand(Config.UnjailCommandName.name, Config.UnjailCommandName.perm
 end, false, {help = Config.UnjailCommandName.help, arguments = {{name = locale("argument.id"), help = locale("argument.id_help"), type = "number"}}})
 
 ESX.RegisterCommand(Config.CheckTimeLeftCommand.name, Config.CheckTimeLeftCommand.permission, function(xPlayer, args, showError)
-    local src = source
+    local src = xPlayer.source
 
     if Config.CheckTimeLeftCommand.allow then
         if xPlayer.getMeta("oocjail") > 0 then
             if Config.CheckJailTimeType == "notify" then
-                MBNotify(locale("notify.title"), locale("notify.check_time", {time = globalJailTime}), 'info', src)
+                MBNotify(locale("notify.title"), locale("notify.check_time", globalJailTime), 'inform', src)
             elseif Config.CheckJailTimeType == "chat" then
-                TriggerClientEvent('chat:addMessage', src, {
-                    template = '<div class="chat-message"><div class="chat-message"><font color="#D994DB"><strong>'..locale("notify.check_time", {time = globalJailTime})..'</div></div>',
-                })
+                MBNotify(locale("notify.title"), locale("notify.check_time", globalJailTime), "inform", src)
             else
                 print("Your choice of output time check is invalid, we dont support that type of output yet! Check your config please.")
             end
         else
-            MBNotify(locale("notify.title"), locale("error.no_permission"), 'error', src)
+            MBNotify(locale("notify.title"), locale("error.no_playerfound"), 'error', src)
         end
     else
         MBNotify(locale("notify.title"), locale("error.no_permission"), 'error', src)
@@ -130,45 +138,51 @@ end)
 
 RegisterNetEvent("mb-oocjail:server:JailPlayer", function(playerId, time)
     local src = source
-    local Player = ESX.GetPlayerFromId(src)
+    local xPlayer = ESX.GetPlayerFromId(src)
     local OtherPlayer = ESX.GetPlayerFromId(playerId)
-
-    OtherPlayer.setMeta("oocjail", time)
-
-    TriggerClientEvent("mb-oocjail:client:AdminJail", OtherPlayer.source, time)
+    if OtherPlayer then
+        OtherPlayer.setMeta("oocjail", time)
+        TriggerClientEvent("mb-oocjail:client:AdminJail", OtherPlayer.source, time)
+    end    
 end)
 
 RegisterNetEvent('mb-oocjail:server:SetJailTime', function(jailTime)
     local src = source
-    local Player = ESX.GetPlayerFromId(src)
-    if not Player then return end
-    Player.setMeta("oocjail", jailTime)
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if not xPlayer then return end
+    xPlayer.setMeta("oocjail", jailTime)
 
     if jailTime ~= 0 then
-        TriggerClientEvent('chat:addMessage', src, {
-            template = '<div class="chat-message"><div class="chat-message"><font color="#D994DB"><strong>'..locale("notify.jailed_player", {time = jailTime})..'</div></div>',
-        })
+        MBNotify("Temps d'emprisonement", locale("notify.jailed_player", jailTime), "error", src)
     else
-        TriggerClientEvent('chat:addMessage', src, {
-            template = '<div class="chat-message"><div class="chat-message"><font color="#D994DB"><strong>'..locale("notify.released_player")..'</div></div>',
-        })
+        MBNotify("Temps d'emprisonement", locale("notify.released_player"), "error", src)
     end
 
     if jailTime > 0 and Config.LostJob then
-        if Player.job.name ~= "unemployed" then
-            Player.setJob("unemployed")
-            MBNotify(locale("notify.title"), locale("success.you_lost_job"), 'info', src)
+        if xPlayer.job.name ~= "unemployed" then
+            xPlayer.setMeta("jobBeforeJail", xPlayer.job.name)
+            xPlayer.setJob("unemployed", 0)
+            MBNotify(locale("notify.title"), locale("success.you_lost_job"), 'inform', src)
         end
     end
 end)
 
 RegisterNetEvent("mb-oocjail:server:ClearInv", function()
     local src = source
-    local Player = ESX.GetPlayerFromId(src)
-    if not Player then return end
+    local xPlayer = ESX.GetPlayerFromId(src)
+    if not xPlayer then return end
     if Config.DeleteInventory then
         Wait(2000)
-        Player.Functions.ClearInventory()
-        MBNotify(locale("notify.title"), locale("success.clear_inv"), 'info', src)
+        xPlayer.Functions.ClearInventory()
+        MBNotify(locale("notify.title"), locale("success.clear_inv"), 'inform', src)
     end
+end)
+
+
+RegisterNetEvent('mb-oocjail:server:UnJailOOC', function()
+	local xPlayer = ESX.GetPlayerFromId(source)
+    if not xPlayer then return end
+
+    SetPlayerRoutingBucket(xPlayer.source, 0)
+    TriggerClientEvent("mb-oocjail:client:UnJailOOC", xPlayer.source)
 end)

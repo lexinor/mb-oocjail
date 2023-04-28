@@ -11,19 +11,9 @@ local function EscapePrevention(curPos)
 			return true
 		else
 			return false
-
 		end
 	end
 end
-
-RegisterNetEvent('esx:playerLoaded', function()
-	PlayerData = ESX.GetPlayerData()
-	if PlayerData.metadata["oocjail"] > 0 then
-		TriggerEvent("mb-oocjail:client:SendToJail", PlayerData.metadata["oocjail"])
-	end
-end)
-
-
 
 RegisterNetEvent("mb-oocjail:client:AdminJail", function(time)
     inJail = true
@@ -56,20 +46,21 @@ RegisterNetEvent("mb-oocjail:client:SendToJail", function(time)
 end)
 
 RegisterNetEvent('mb-oocjail:client:UnJailOOC', function()
-	if jailTime > 0 then
+	local src = source
+	if jailTime > 0 and src >= 65535 then
 		MBNotify(locale("notify.title"), locale("success.you_are_free"), 'success')
 		DoScreenFadeOut(500)
 		while not IsScreenFadedOut() do
 			Wait(10)
 		end
-		TriggerEvent('mb-oocjail:client:Leave')
+		TriggerEvent('mb-oocjail:client:Leave', src)
 		Wait(500)
 		DoScreenFadeIn(1000)
 	end
 end)
 
-RegisterNetEvent('mb-oocjail:client:Leave', function()
-	if inJail then
+RegisterNetEvent('mb-oocjail:client:Leave', function(fromServ)
+	if inJail and fromServ >= 65535 then
 		jailTime = 0
 		inJail = false
 		TriggerServerEvent("mb-oocjail:server:SetJailTime", 0)
@@ -91,13 +82,13 @@ RegisterNetEvent('mb-oocjail:client:showTime', function()
 	isRunText = true
 	TriggerEvent('mb-oocjail:client:checkTime')
 	while not inJail and jailTime > 0 do
-		Citizen.Wait(0)
+		Wait(0)
 	end
 end)
 
 RegisterNetEvent('mb-oocjail:client:checkTime', function()
 	while inJail and jailTime > 0 do
-		Citizen.Wait(60 * 1000)
+		Wait(60 * 1000)
 		if inJail and jailTime > 0 then
 			jailTime = jailTime - 1
 			if jailTime <= 0 then jailTime = 0 end
@@ -109,17 +100,17 @@ RegisterNetEvent('mb-oocjail:client:checkTime', function()
 	isRunText = false
 end)
 
-Citizen.CreateThread(function()
+CreateThread(function()
 	while true do
 		if inJail and jailTime > 0 then
 			local curPos = GetEntityCoords(cache.ped or PlayerPedId())
 			if EscapePrevention(curPos) then
 				PlayerData = ESX.GetPlayerData()
-				if PlayerData.getMeta("oocjail") > 0 then
-					TriggerEvent("mb-oocjail:client:SendToJail", PlayerData.getMeta("oocjail"))
+				if PlayerData.metadata["oocjail"] > 0 then
+					TriggerEvent("mb-oocjail:client:SendToJail", PlayerData.metadata["oocjail"] )
 				end
 			end
 		end
-		Citizen.Wait(Config.PreventEscapeMod.checkTime)
+		Wait(Config.PreventEscapeMod.checkTime)
 	end
 end)

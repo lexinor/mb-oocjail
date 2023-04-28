@@ -7,9 +7,11 @@
     "error.no_permission": "No permission to use this command",
     "error.invalid_argument": "Invalid input",
     "notify.title": "OOC Jail",
-    "notify.jailed_player": "• System • <font color='#C1C1C1'>You have been OOC Jail for <font color='#53A263'>%{time} <font color='#C1C1C1'> minutes (See discord for more information).",
-    "notify.released_player": "• System • <font color='#C1C1C1'>You have been <font color='#53A263'>release<font color='#C1C1C1'> from OOC jail (dont break the rule again).",
-    "notify.check_time": "You still have %{time} minutes left from OOC Jail, keep regreting!",
+    "notify.jailed_player.html": "• System • <font color='#C1C1C1'>You have been OOC Jail for <font color='#53A263'>%s <font color='#C1C1C1'> minutes (See discord for more information).",
+    "notify.released_player.html": "• System • <font color='#C1C1C1'>You have been <font color='#53A263'>release<font color='#C1C1C1'> from OOC jail (dont break the rule again).",
+    "notify.jailed_player": "• System • You have been OOC Jail for %s minutes (See discord for more information).",
+    "notify.released_player": "• System • You have been release from OOC jail (dont break the rule again).",
+    "notify.check_time": "You still have %s minutes left from OOC Jail, keep regreting!",
     "argument.id": "id",
     "argument.id_help": "Player's ID",
     "argument.time": "time",
@@ -17,6 +19,6 @@
     "argument.reason": "reason",
     "argument.reason_help": "Reason for the jail",
     "log.jail_title": "OOC Jail",
-    "log.jail_description": "`Total jail time: %{time} mins`\n`Reason: %{reason}`\n\n Join our discord for more information",
-    "log.jail_additional": "**Prisoner** (%{discord})\n`Player's ID: %{ID}`\n`In-game name: %{fName} %{lName}`\n`CID: %{CID}`\n\n**Admin** (%{adDiscord})\n`In-game name: %{adFName} %{adLName}`\n%{message}"
+    "log.jail_description": "`Total jail time: %s mins`\n`Reason: %s`\n\n Join our discord for more information",
+    "log.jail_additional": "**Prisoner** (%s)\n`Player's ID: %s`\n`In-game name: %s %s`\n`CID: %s`\n\n**Admin** (%s)\n`In-game name: %s %s`\n%s"
 }
