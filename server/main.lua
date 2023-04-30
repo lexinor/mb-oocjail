@@ -2,7 +2,7 @@ lib.locale()
 local globalJailTime = 0
 
 AddEventHandler('esx:playerLoaded', function(playerId, xPlayer, isNew)
-    if xPlayer.metadata["oocjail"] > 0 then
+    if xPlayer.metadata["oocjail"] and xPlayer.metadata["oocjail"] > 0 then
         TriggerEvent("mb-oocjail:server:JailPlayer", tonumber(playerId), tonumber(xPlayer.metadata["oocjail"]))
         SetPlayerRoutingBucket(playerId, playerId)
 	end
@@ -93,7 +93,7 @@ ESX.RegisterCommand(Config.JailCommandName.name, Config.JailCommandName.permissi
         end
     end
 end, false, {help = Config.JailCommandName.help, arguments = {
-    {name = locale("argument.id"), help = locale("argument.id_help"), type = "number"}, 
+    {name = locale("argument.id"), help = locale("argument.id_help"), type = "number"},
     {name = locale("argument.time"), help = locale("argument.time_help"), type = "number"}, 
     {name = locale("argument.reason"), help = locale("argument.reason_help"), type = "string"},
 }})
@@ -142,6 +142,7 @@ RegisterNetEvent("mb-oocjail:server:JailPlayer", function(playerId, time)
     local OtherPlayer = ESX.GetPlayerFromId(playerId)
     if OtherPlayer then
         OtherPlayer.setMeta("oocjail", time)
+        SetPlayerRoutingBucket(OtherPlayer.source, OtherPlayer.source)
         TriggerClientEvent("mb-oocjail:client:AdminJail", OtherPlayer.source, time)
     end    
 end)
@@ -160,7 +161,7 @@ RegisterNetEvent('mb-oocjail:server:SetJailTime', function(jailTime)
 
     if jailTime > 0 and Config.LostJob then
         if xPlayer.job.name ~= "unemployed" then
-            xPlayer.setMeta("jobBeforeJail", xPlayer.job.name)
+            xPlayer.setMeta("jobBeforeJail", { jobName = xPlayer.job.name, grade = xPlayer.job.grade })
             xPlayer.setJob("unemployed", 0)
             MBNotify(locale("notify.title"), locale("success.you_lost_job"), 'inform', src)
         end
@@ -184,5 +185,9 @@ RegisterNetEvent('mb-oocjail:server:UnJailOOC', function()
     if not xPlayer then return end
 
     SetPlayerRoutingBucket(xPlayer.source, 0)
+    local jobBeforeJail = xPlayer.getMeta('jobBeforeJail')
+    print(json.encode(jobBeforeJail))
+    xPlayer.setJob(jobBeforeJail.jobName, jobBeforeJail.grade)
+    print(xPlayer.source)
     TriggerClientEvent("mb-oocjail:client:UnJailOOC", xPlayer.source)
 end)

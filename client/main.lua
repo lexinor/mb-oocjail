@@ -47,7 +47,9 @@ end)
 
 RegisterNetEvent('mb-oocjail:client:UnJailOOC', function()
 	local src = source
-	if jailTime > 0 and src >= 65535 then
+	--if jailTime > 0 and src >= 65535 then
+	if jailTime > 0 then
+		
 		MBNotify(locale("notify.title"), locale("success.you_are_free"), 'success')
 		DoScreenFadeOut(500)
 		while not IsScreenFadedOut() do
@@ -60,7 +62,9 @@ RegisterNetEvent('mb-oocjail:client:UnJailOOC', function()
 end)
 
 RegisterNetEvent('mb-oocjail:client:Leave', function(fromServ)
-	if inJail and fromServ >= 65535 then
+	--if inJail and fromServ >= 65535 then
+	if inJail then
+		print("leave")
 		jailTime = 0
 		inJail = false
 		TriggerServerEvent("mb-oocjail:server:SetJailTime", 0)
@@ -97,6 +101,7 @@ RegisterNetEvent('mb-oocjail:client:checkTime', function()
 		end
 	end
 	TriggerEvent("mb-oocjail:client:Leave")
+	--TriggerServerEvent("mb-oocjail:server:UnJailOOC")
 	isRunText = false
 end)
 
