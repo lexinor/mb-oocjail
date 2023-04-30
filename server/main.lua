@@ -186,8 +186,6 @@ RegisterNetEvent('mb-oocjail:server:UnJailOOC', function()
 
     SetPlayerRoutingBucket(xPlayer.source, 0)
     local jobBeforeJail = xPlayer.getMeta('jobBeforeJail')
-    print(json.encode(jobBeforeJail))
     xPlayer.setJob(jobBeforeJail.jobName, jobBeforeJail.grade)
-    print(xPlayer.source)
     TriggerClientEvent("mb-oocjail:client:UnJailOOC", xPlayer.source)
 end)

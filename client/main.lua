@@ -64,7 +64,6 @@ end)
 RegisterNetEvent('mb-oocjail:client:Leave', function(fromServ)
 	--if inJail and fromServ >= 65535 then
 	if inJail then
-		print("leave")
 		jailTime = 0
 		inJail = false
 		TriggerServerEvent("mb-oocjail:server:SetJailTime", 0)
