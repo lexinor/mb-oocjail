@@ -43,6 +43,16 @@ RegisterNetEvent("mb-oocjail:client:SendToJail", function(time)
 	TriggerServerEvent("InteractSound_SV:PlayOnSource", "jail", 0.5)
 	Wait(2000)
 	DoScreenFadeIn(1000)
+	CreateThread(function()
+		while true do
+			if inJail and jailTime > 0 then
+				local curPos = GetEntityCoords(cache.ped or PlayerPedId())
+				TriggerEvent("esx_status:set", "hunger", 300000)
+				TriggerEvent("esx_status:set", "thirst", 300000)
+			end
+			Wait(30000)
+		end
+	end)
 end)
 
 RegisterNetEvent('mb-oocjail:client:UnJailOOC', function()

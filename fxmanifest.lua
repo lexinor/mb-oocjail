@@ -19,8 +19,6 @@ shared_scripts {
     "@es_extended/imports.lua",
     "@ox_lib/init.lua",
     'config.lua',
-    'locales/en.lua',
-    'locales/*.lua',
     'shared/shared.lua',
 }
 

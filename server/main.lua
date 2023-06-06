@@ -156,7 +156,10 @@ RegisterNetEvent('mb-oocjail:server:SetJailTime', function(jailTime)
     if jailTime ~= 0 then
         MBNotify("Temps d'emprisonement", locale("notify.jailed_player", jailTime), "error", src)
     else
-        MBNotify("Temps d'emprisonement", locale("notify.released_player"), "error", src)
+        MBNotify("Temps d'emprisonement", locale("notify.released_player"), "inform", src)
+        SetPlayerRoutingBucket(src, 0)
+        local jobBeforeJail = xPlayer.getMeta('jobBeforeJail')
+        xPlayer.setJob(jobBeforeJail.jobName, jobBeforeJail.grade)
     end
 
     if jailTime > 0 and Config.LostJob then
